@@ -1,0 +1,35 @@
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Claude local/runtime files
+.claude/settings.local.json
+.claude/settings.json
+.claude/history.jsonl
+.claude/cache/
+.claude/backups/
+.claude/debug/
+.claude/file-history/
+.claude/ide/
+.claude/image-cache/
+.claude/paste-cache/
+.claude/projects/
+.claude/session-env/
+.claude/sessions/
+.claude/shell-snapshots/
+.claude/statsig/
+.claude/tasks/
+.claude/telemetry/
+.claude/todos/
+
+# Per-project orchestrator runtime state
+.orchestrator/state.json
+.orchestrator/standup.md
+.orchestrator/blocker.md
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
