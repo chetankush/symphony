@@ -83,6 +83,53 @@ cat > "$PROJECT_PATH/.claude/settings.local.json" <<'JSON'
         ]
       }
     ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(npm:*)",
+      "Bash(pnpm:*)",
+      "Bash(yarn:*)",
+      "Bash(npx:*)",
+      "Bash(bun:*)",
+      "Bash(node:*)",
+      "Bash(deno:*)",
+      "Bash(tsc:*)",
+      "Bash(eslint:*)",
+      "Bash(prettier:*)",
+      "Bash(biome:*)",
+      "Bash(jest:*)",
+      "Bash(vitest:*)",
+      "Bash(playwright:*)",
+      "Bash(mocha:*)",
+      "Bash(cypress:*)",
+      "Bash(vite:*)",
+      "Bash(next:*)",
+      "Bash(nuxt:*)",
+      "Bash(webpack:*)",
+      "Bash(rollup:*)",
+      "Bash(esbuild:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(git remote:*)",
+      "Bash(git add:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(find:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(pwd)",
+      "Bash(tree:*)",
+      "Bash(mkdir:*)",
+      "Bash(which:*)",
+      "Bash(file:*)",
+      "Bash(echo:*)"
+    ]
   }
 }
 JSON
