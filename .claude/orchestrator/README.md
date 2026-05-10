@@ -19,7 +19,7 @@ claude        # start Claude Code
 Works in three scenarios — `/build` auto-detects which one you're in:
 
 ### Greenfield (empty/new directory)
-1. Intake interview — 15–25 strategic questions, one at a time
+1. Intake interview — 8–10 strategic questions, one at a time (hard cap 10)
 2. You approve the inferred assumptions → brief locks
 3. Comprehension stack runs: product analyst → competitive analyst → strategy analyst (writes product spec, roles, stories, use cases, flows, test cases, competitive analysis, USP/moat)
 4. You validate the comprehension picture (small batch — most was derived from your own intake)

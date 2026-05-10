@@ -36,7 +36,7 @@ claude
 
 **What you'll experience:**
 
-1. **Interview (10–15 min).** One question at a time about your product. Answer in your own words. Skip what you don't know.
+1. **Interview (~5–8 min).** 8–10 questions max, one at a time. Answer in your own words. Skip what you don't know.
 2. **Assumption review (5 min).** Orchestrator shows ~30 silent defaults it applied (auth = email + Google, db = Postgres, etc.). Skim. Override anything wrong. Approve.
 3. **Comprehension stack runs autonomously (~15 min).** Product analyst writes user stories + test cases. Competitive analyst does web research. Strategy analyst writes USPs/moat. **Pause** — review the picture.
 4. **v0/MVP builds autonomously (30–90 min).** Architect → designer → acquisition → planner → coder loop → tester → 9 reviewers. **Pause** at end of MVP.
