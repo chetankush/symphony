@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 // PreToolUse hook — blocks deletion of .tsx/.ts/.css project files.
-// Reads the tool call from stdin (Claude Code hook protocol) and writes a JSON decision.
+// Reads the tool call from stdin (Claude Code hook protocol).
 //
-// Trigger: PreToolUse, matcher: "Bash|Edit|Write"
+// Trigger: PreToolUse, matcher: "Bash"
 // Behavior:
 //   - Bash: blocks `rm`/`Remove-Item` against .tsx/.ts/.css/.scss/.module.css paths.
-//   - Edit/Write: no block (those tools cannot delete by themselves).
-// Exit 0 with allow JSON; exit 0 with block JSON to refuse.
+// Protocol:
+//   - Exit 0 with no output → allow.
+//   - Exit 2 with stderr message → block; the reason is fed back to Claude.
 
 const fs = require('fs');
 let input = '';
@@ -39,13 +40,9 @@ function isDangerous(cmd) {
 if (toolName === 'Bash') {
   const hit = isDangerous(command);
   if (hit) {
-    console.log(JSON.stringify({
-      decision: 'block',
-      reason: `File-deletion guardrail: command "${hit.trim()}" appears to delete a protected file type (.tsx/.ts/.css/etc.). Project policy: never delete these files; orphan them by removing imports instead. If this is intentional, ask the user explicitly.`
-    }));
-    process.exit(0);
+    process.stderr.write(`File-deletion guardrail: command "${hit.trim()}" appears to delete a protected file type (.tsx/.ts/.css/etc.). Project policy: never delete these files; orphan them by removing imports instead. If this is intentional, ask the user explicitly.\n`);
+    process.exit(2);
   }
 }
 
-console.log(JSON.stringify({ decision: 'allow' }));
 process.exit(0);

@@ -3,7 +3,9 @@
 // Allows Edit (which adds content) but blocks Write that would shrink/replace these files.
 //
 // Trigger: PreToolUse, matcher: "Write|Edit"
-// Behavior: when target is decisions.md or standup.md and the operation would lose existing content, block.
+// Protocol:
+//   - Exit 0 with no output → allow.
+//   - Exit 2 with stderr message → block; reason fed back to Claude.
 
 const fs = require('fs');
 const path = require('path');
@@ -35,11 +37,8 @@ if (toolName === 'Write') {
     const current = existingContent(filePath);
     const incoming = (toolInput.content || '').toString();
     if (current && !incoming.startsWith(current)) {
-      console.log(JSON.stringify({
-        decision: 'block',
-        reason: `Append-only guardrail: ${path.basename(filePath)} is append-only. Use Edit to add new entries; never overwrite existing content. Existing content not found at start of new content.`
-      }));
-      process.exit(0);
+      process.stderr.write(`Append-only guardrail: ${path.basename(filePath)} is append-only. Use Edit to add new entries; never overwrite existing content. Existing content not found at start of new content.\n`);
+      process.exit(2);
     }
   }
 }
@@ -51,14 +50,10 @@ if (toolName === 'Edit') {
     const newString = (toolInput.new_string || '').toString();
     // Only allow edits whose new_string contains the old_string (i.e. additions, not replacements that lose content).
     if (oldString && !newString.includes(oldString)) {
-      console.log(JSON.stringify({
-        decision: 'block',
-        reason: `Append-only guardrail: ${path.basename(filePath)} edits must preserve old_string within new_string (i.e. only add content). To override a past entry, append a new entry that supersedes it.`
-      }));
-      process.exit(0);
+      process.stderr.write(`Append-only guardrail: ${path.basename(filePath)} edits must preserve old_string within new_string (i.e. only add content). To override a past entry, append a new entry that supersedes it.\n`);
+      process.exit(2);
     }
   }
 }
 
-console.log(JSON.stringify({ decision: 'allow' }));
 process.exit(0);
