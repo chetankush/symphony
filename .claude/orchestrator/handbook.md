@@ -26,6 +26,101 @@ It DOES override:
 
 Every producer and reviewer agent applies this rule when comparing options. The supervisor cites it when escalating ambiguous choices.
 
+## 0a. Operating constraints (apply to every agent)
+
+These are **hard defaults**. Apply silently — do not pause to ask the user.
+
+### Free-tier-first stack
+
+- **No paid services** unless the user explicitly approves the spend. The default product must run end-to-end on free tiers.
+- **No third-party integrations** in v0/MVP unless they are (a) free, (b) zero-config or near-zero-config, and (c) load-bearing for the wedge. If unsure, defer the integration to v1+.
+- Preferred free-tier defaults when an agent needs to pick a vendor:
+  - Hosting: Vercel (Hobby), Netlify, Cloudflare Pages
+  - Database / auth: Supabase free tier, Neon free tier, Turso free tier
+  - Email: Resend free tier (3k/mo), or skip transactional email in v0
+  - Analytics: PostHog Cloud free tier or self-hosted, Plausible self-hosted, or none
+  - Error tracking: Sentry free tier — but only wire it if v1+
+  - Payments: Stripe (no subscription cost; only transaction fees) — defer unless the brief explicitly monetizes in this version
+  - LLM keys: use the user's existing key; do not introduce new paid APIs
+- Architects, designers, and planners must call this out in `architecture.md` / `decisions.md` when a free tier limit might be hit, but ship the free option first.
+
+### Autonomous decision authority
+
+Agents (especially `coder`, `tester`, `eng-reviewer`, `architect`, `designer`) **must not pause to ask the user** for any of the following — decide and proceed, log the choice to `decisions.md` if non-trivial:
+
+- Which read-only bash command to run (`ls`, `cat`, `grep`, `awk`, `find`, `jq`, `python3 -c`, `for`/`while` loops, pipes, etc.). The permission allowlist in `.claude/settings.json` covers safe inspection; if a command is blocked, pick a different inspection approach, do not surface the prompt.
+- Internal file structure, naming conventions, lint config, test framework selection — as long as the choice is reversible and matches the stack in `architecture.md`.
+- Whether to install a free, widely-used dependency (e.g. `zod`, `clsx`, `date-fns`) when the architecture allows it. Log the install in `decisions.md`.
+- How to fix a typecheck/lint/test failure when the fix is local and obvious.
+
+Only escalate to the user when:
+- The choice would commit the user to a paid service or a long-term vendor lock-in.
+- The choice contradicts the brief, decisions log, or a hard guardrail.
+- A guardrail has tripped (then write `blocker.md`).
+- The user explicitly asked to be consulted on this class of decision.
+
+The supervisor's "single-tool-per-iteration" rule still applies; this section is about *interactive* user prompts, not the supervisor's dispatch cadence.
+
+## 0b. Karpathy guidelines (coding behavior)
+
+Behavioral guidelines to reduce common LLM coding mistakes. Apply when writing, reviewing, or refactoring code. **Bias toward caution over speed; for trivial tasks, use judgment.**
+
+These guidelines apply to: `coder`, `eng-reviewer`, `architect`, `designer`, `planner`, `sub-planner`, `tester`, and any reviewer that suggests code changes.
+
+> **Reconciling with §0a:** §0a (autonomous decisions) covers *mechanical, reversible* choices — which read-only shell command, which lint config, which obvious bugfix. Karpathy §1 ("ask if unclear") covers *requirement ambiguity* — what the user actually wants. Don't pause on mechanics; do pause when the spec is genuinely ambiguous and the wrong interpretation would mean wasted work.
+
+### 1. Think Before Coding
+*Don't assume. Don't hide confusion. Surface tradeoffs.*
+
+Before implementing:
+- State assumptions explicitly. If uncertain about a **requirement**, ask.
+- If multiple interpretations exist, present them — don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
+
+### 2. Simplicity First
+*Minimum code that solves the problem. Nothing speculative.*
+
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you wrote 200 lines and it could be 50, rewrite it.
+- Self-check: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+### 3. Surgical Changes
+*Touch only what you must. Clean up only your own mess.*
+
+When editing existing code:
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it in the task report — don't delete it.
+
+When your changes create orphans:
+- Remove imports/variables/functions that **your** changes made unused.
+- Don't remove pre-existing dead code unless asked.
+
+The test: every changed line should trace directly to the task's Definition of Done.
+
+### 4. Goal-Driven Execution
+*Define success criteria. Loop until verified.*
+
+Transform tasks into verifiable goals:
+- "Add validation" → "Write tests for invalid inputs, then make them pass."
+- "Fix the bug" → "Write a test that reproduces it, then make it pass."
+- "Refactor X" → "Ensure tests pass before and after."
+
+For multi-step tasks, state a brief plan:
+
+```
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+```
+
+Strong success criteria let the coder/tester loop independently. Weak criteria ("make it work") require constant clarification and produce drift. The `planner` is responsible for writing Definitions of Done that meet this bar; reviewers reject tasks that don't.
+
 ## 1. The supervisor
 
 The supervisor is **the body of the `/build` slash command**, run by the main Claude Code session. It is not a subagent. It dispatches subagents via the `Task` tool, reads/writes `.orchestrator/` state, and enforces guardrails.
